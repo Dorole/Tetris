@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+*.vsidx
+*.lock
+.vs/Tetris/v17/.suo
+*.db
+*.ipch
+*.recipe
+*.ilk
+*.log
+*.pdb
+*.tlog
+*.txt
+*.idb
