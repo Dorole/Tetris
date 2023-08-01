@@ -11,6 +11,7 @@
 #include "GridPointData.h"
 #include "GameManager.h"
 
+
 using namespace std;
 using namespace sf;
 
@@ -19,8 +20,11 @@ bool compareValueByY(const GridPointData& a, const GridPointData& b)
     return a.coordinates.y > b.coordinates.y;
 }
 
+
+
 int main()
 {
+#pragma region PARAMETERS
     GameManager gameManager;
 
     RenderWindow window(VideoMode(1000, 1250), "Tetris");
@@ -80,93 +84,31 @@ int main()
 
     vector<int> linesToRemove = {};
     bool gameOver = false;
+#pragma endregion 
 
      while (window.isOpen())
      {
-         if (linesToRemove.empty()) //potencijalno ne treba ova provjera
-         {
-             for (size_t i = 0; i < yAxis; i++)
-             {
-                 bool shouldRemoveLine = true;
-                 for (size_t j = 0; j < xAxis; j++)
-                 {
-                     if (grid.at(j).at(i) != true)
-                     {
-                         shouldRemoveLine = false;
-                         break;
-                     }
-                 }
-
-                 if (shouldRemoveLine)
-                 {
-                     //cout << "Remove line " << i << endl;
-                     linesToRemove.push_back(i);
-                 }
-             }
-         }
+         gameManager.checkRowFull(yAxis, xAxis, grid, linesToRemove);
 
          while (!linesToRemove.empty())
          {
-             //set entire row to false
-             for (size_t i = 0; i < linesToRemove.size(); i++)
-             {
-                 for (size_t j = 0; j < xAxis; j++)
-                 {
-                     grid.at(j).at(linesToRemove.at(i)) = false;
-                 }
-             }
+             gameManager.setRowValue(linesToRemove, xAxis, grid, false);
 
              //delete data from removed rows
-			 int i = 0;
-			 while (i < gridDataVector.size())
-			 {
-				 int xCoordinate = gridDataVector.at(i).coordinates.x;
-				 int yCoordinate = gridDataVector.at(i).coordinates.y;
-
-				 if (grid.at(xCoordinate).at(yCoordinate) == false)
-				 {
-					 swap(gridDataVector.at(i), gridDataVector[gridDataVector.size() - 1]);
-					 gridDataVector.pop_back();
-					 //cout << "Deleted data on: " << xCoordinate << ", " << yCoordinate << endl;
-				 }
-				 else
-					 i++;
-			 }
+             gridData.deleteDataFromGrid(gridDataVector, grid);
 
 			 //sort data in the vector by descending y coordinates
 			 sort(gridDataVector.begin(), gridDataVector.end(), compareValueByY);
 
              //push remaining data and blocks down
-             for (auto dataPoint : gridDataVector)
-             {
-                 int xCoordinate = dataPoint.coordinates.x;
-                 int yCoordinate = dataPoint.coordinates.y;
-
-                 int nextMoveY = yCoordinate + 1;
-
-                 if (nextMoveY >= yAxis || (grid[xCoordinate][nextMoveY] == true))
-                    continue;
-
-                 bool finishedMoving = false;
-                 while (!finishedMoving)
-                 {
-                     if ((nextMoveY + 1 < yAxis) && grid[xCoordinate][nextMoveY] == false)
-                         nextMoveY++;
-                     else
-                         finishedMoving = true;
-                 }
-
-				 dataPoint.coordinates.y = nextMoveY;
-				 grid[xCoordinate][yCoordinate] = false;                 
-				 grid[xCoordinate][dataPoint.coordinates.y] = true;
-			 }
+             gridData.pushDataDownOnGrid(gridDataVector, yAxis, grid);
 
             linesToRemove.clear();
   
          }
          
 
-         if (linesToRemove.empty()) // ova provjera ne treba?
+         if (linesToRemove.empty()) 
          {
              Time elapsedTime = clock.getElapsedTime();
 
@@ -226,23 +168,18 @@ int main()
 
              if (!gameOver && elapsedTime.asSeconds() >= currentFallingSpeed)
              {
-                 //proslo vrijeme izmedu 2 spustanja, spusti block za 1
-                 //probat spustit, ako ne ide, settle
                  if (!(tetromino->hasReachedBottomBorder(lastY)) &&
                      tetromino->canTranslateDownwards(grid))
                  {
-                     //moze se spustiti
                      for (size_t i = 0; i < 4; i++)
                          tetromino->blockPosition[i].y++;
                  }
                  else
-                 {
-                     // ne moze se spustiti > settle on grid
+                 {                   
                      for (auto blockPoint : tetromino->blockPosition)
                      {
                          grid[blockPoint.x][blockPoint.y] = true;
 
-                         //
                          GridPointData gridPoint =
                          {
                              Vector2i(blockPoint.x, blockPoint.y),
@@ -253,14 +190,10 @@ int main()
 
                      }
 
-                     for (auto block : blocksVector)
-                         delete block;
-
-                     blocksVector.clear();
+                     //
+                     gameManager.clearBlocksVector(blocksVector);
                      blocksVector = gameManager.resetBlocksVector();
-
-                     //spawn new tetromino
-                     //if cannot spawn new > game over
+                     //
 
                      tetromino = gameManager.getRandomBlock(blocksVector);
 
@@ -304,7 +237,8 @@ int main()
                     Vector2i position = { i, j };
 
                     Sprite fixedBlockSprite = blockSprite;
-                    fixedBlockSprite.setColor(gridData.getGridPointFromCoordinates(i, j, gridDataVector).color);
+                    Color thisColor = gridData.getGridPointFromCoordinates(i, j, gridDataVector).color;
+                    fixedBlockSprite.setColor(thisColor);
                     fixedBlockSprite.setPosition(position.x * blockOffset, position.y * blockOffset);
 
                     window.draw(fixedBlockSprite);
@@ -322,3 +256,5 @@ int main()
 
     delete tetromino;
 }
+
+

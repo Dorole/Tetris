@@ -42,3 +42,10 @@
 *.tlog
 *.txt
 *.idb
+*.db-shm
+*.db-wal
+*.opendb
+*.filters
+*.vcxproj
+Tetris.vcxproj
+Tetris.vcxproj.filters

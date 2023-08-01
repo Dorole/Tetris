@@ -48,6 +48,14 @@ int GameManager::getIndex(vector<Tetromino*> blocksVector, Tetromino* block)
 
 }
 
+void GameManager::clearBlocksVector(vector<Tetromino*>& blocksVector)
+{
+	for (auto block : blocksVector)
+		delete block;
+
+	blocksVector.clear();
+}
+
 vector<Tetromino*> GameManager::resetBlocksVector()
 {
 	Tetromino* tBlock = new TBlock();
@@ -60,3 +68,38 @@ vector<Tetromino*> GameManager::resetBlocksVector()
 
 	return { tBlock, lBlock, jBlock, oBlock, iBlock, sBlock, zBlock };
 }
+
+void GameManager::checkRowFull(const unsigned int& yAxis, const unsigned int& xAxis, vector<vector<bool>>& grid, vector<int>& linesToRemove)
+{
+	for (size_t i = 0; i < yAxis; i++)
+	{
+		bool shouldRemoveLine = true;
+		for (size_t j = 0; j < xAxis; j++)
+		{
+			if (grid.at(j).at(i) != true)
+			{
+				shouldRemoveLine = false;
+				break;
+			}
+		}
+
+		if (shouldRemoveLine)
+		{
+			//cout << "Remove line " << i << endl;
+			linesToRemove.push_back(i);
+		}
+	}
+}
+
+void GameManager::setRowValue(vector<int>& linesToRemove, const unsigned int& xAxis, vector<vector<bool>>& grid, bool value)
+{
+	for (size_t i = 0; i < linesToRemove.size(); i++)
+	{
+		for (size_t j = 0; j < xAxis; j++)
+		{
+			grid.at(j).at(linesToRemove.at(i)) = value;
+		}
+	}
+}
+
+

@@ -14,6 +14,7 @@ public:
 
     GridPointData getGridPointFromCoordinates(int x, int y, vector<GridPointData>& gridVec);
     bool checkForDataOnCoordinates(int x, int y, vector<GridPointData>& gridVec);
-
+    void deleteDataFromGrid(vector<GridPointData>& gridDataVector, vector<vector<bool>>& grid);
+    void pushDataDownOnGrid(vector<GridPointData>& gridDataVector, const unsigned int& yAxis, vector<vector<bool>>& grid);
 };
 
