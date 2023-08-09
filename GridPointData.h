@@ -12,9 +12,11 @@ public:
     bool occupied = false;
     Color color = Color(0, 0, 0);
 
+    void changeYCoordinate(GridPointData& gridPointData, int value);
     GridPointData getGridPointFromCoordinates(int x, int y, vector<GridPointData>& gridVec);
     bool checkForDataOnCoordinates(int x, int y, vector<GridPointData>& gridVec);
-    void deleteDataFromGrid(vector<GridPointData>& gridDataVector, vector<vector<bool>>& grid);
-    void pushDataDownOnGrid(vector<GridPointData>& gridDataVector, const unsigned int& yAxis, vector<vector<bool>>& grid);
+    void deleteDataFromGrid(vector<int>& linesToRemove, vector<vector<GridPointData>>& gridDataVector, const unsigned int& xAxis);
+    void pushDataDownOnGrid(vector<vector<GridPointData>>& gridDataVector, const unsigned int& xAxis, const unsigned int& yAxis);
+    void changeOccupiedState();
 };
 

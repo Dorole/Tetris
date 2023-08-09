@@ -3,6 +3,11 @@
 
 using namespace std;
 
+void GridPointData::changeYCoordinate(GridPointData& gridPointData, int value)
+{
+    gridPointData.coordinates.y += value;
+}
+
 GridPointData GridPointData::getGridPointFromCoordinates(int x, int y, vector<GridPointData>& gridVector)
 {
     for (GridPointData point : gridVector)
@@ -23,48 +28,35 @@ bool GridPointData::checkForDataOnCoordinates(int x, int y, vector<GridPointData
     return false;
 }
 
-void GridPointData::deleteDataFromGrid(vector<GridPointData>& gridDataVector, vector<vector<bool>>& grid)
+void GridPointData::deleteDataFromGrid(vector<int>& linesToRemove, vector<vector<GridPointData>>& gridDataVector, const unsigned int& xAxis)
 {
-    int i = 0;
-    while (i < gridDataVector.size())
+    for (size_t i = 0; i < linesToRemove.size(); i++)
     {
-        int xCoordinate = gridDataVector.at(i).coordinates.x;
-        int yCoordinate = gridDataVector.at(i).coordinates.y;
-
-        if (grid.at(xCoordinate).at(yCoordinate) == false)
+        for (size_t j = 0; j < xAxis; j++)
         {
-            swap(gridDataVector.at(i), gridDataVector[gridDataVector.size() - 1]);
-            gridDataVector.pop_back();
-            //cout << "Deleted data on: " << xCoordinate << ", " << yCoordinate << endl;
+            gridDataVector.at(j).at(linesToRemove.at(i)).changeOccupiedState();
         }
-        else
-            i++;
     }
 }
 
-void GridPointData::pushDataDownOnGrid(vector<GridPointData>& gridDataVector, const unsigned int& yAxis, vector<vector<bool>>& grid)
+void GridPointData::pushDataDownOnGrid(vector<vector<GridPointData>>& gridDataVector, const unsigned int& xAxis, const unsigned int& yAxis)
 {
-    for (auto dataPoint : gridDataVector)
+    for (int i = 0; i < xAxis; i++)
     {
-        int xCoordinate = dataPoint.coordinates.x;
-        int yCoordinate = dataPoint.coordinates.y;
-
-        int nextMoveY = yCoordinate + 1;
-
-        if (nextMoveY >= yAxis || (grid[xCoordinate][nextMoveY] == true))
-            continue;
-
-        bool finishedMoving = false;
-        while (!finishedMoving)
+        for (int j = yAxis - 1; j > -1; j--)
         {
-            if ((nextMoveY + 1 < yAxis) && grid[xCoordinate][nextMoveY] == false)
-                nextMoveY++;
-            else
-                finishedMoving = true;
+            if (gridDataVector.at(i).at(j).occupied && (j + 1 < yAxis) && !gridDataVector.at(i).at(j + 1).occupied)
+            {
+                Color c = gridDataVector.at(i).at(j).color;
+                gridDataVector.at(i).at(j + 1).color = c;
+                gridDataVector.at(i).at(j + 1).changeOccupiedState();
+                gridDataVector.at(i).at(j).changeOccupiedState();
+            }
         }
-
-        dataPoint.coordinates.y = nextMoveY;
-        grid[xCoordinate][yCoordinate] = false;
-        grid[xCoordinate][dataPoint.coordinates.y] = true;
     }
+}
+
+void GridPointData::changeOccupiedState()
+{
+    occupied = !occupied;
 }

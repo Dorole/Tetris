@@ -2,12 +2,13 @@
 #include <iostream>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include "GridPointData.h"
 
 using namespace std;
 using namespace sf;
 
 
-void Tetromino::translateBlockHorizontally(vector<vector<bool>>& grid, int direction)
+void Tetromino::translateBlockHorizontally(vector<vector<GridPointData>>& grid, int direction)
 {
     for (auto positions : blockPosition)
     {
@@ -20,10 +21,10 @@ void Tetromino::translateBlockHorizontally(vector<vector<bool>>& grid, int direc
 
 
     if (
-        grid[blockPosition[0].x + direction][blockPosition[0].y] == false &&
-        grid[blockPosition[1].x + direction][blockPosition[1].y] == false &&
-        grid[blockPosition[2].x + direction][blockPosition[2].y] == false &&
-        grid[blockPosition[3].x + direction][blockPosition[3].y] == false
+        !grid[blockPosition[0].x + direction][blockPosition[0].y].occupied &&
+        !grid[blockPosition[1].x + direction][blockPosition[1].y].occupied &&
+        !grid[blockPosition[2].x + direction][blockPosition[2].y].occupied &&
+        !grid[blockPosition[3].x + direction][blockPosition[3].y].occupied
         )
     {
         for (size_t i = 0; i < 4; i++)
@@ -44,18 +45,18 @@ bool Tetromino::hasReachedBottomBorder(const int bottomBorderIndex)
     return false;
 }
 
-bool Tetromino::canTranslateDownwards(vector<vector<bool>>& grid)
+bool Tetromino::canTranslateDownwards(vector<vector<GridPointData>>& grid)
 {
     for (auto positions : blockPosition)
     {
-        if (grid[positions.x][positions.y + 1] != 0)
+        if (grid[positions.x][positions.y + 1].occupied)
             return false;
     }
 
     return true;
 }
 
-bool Tetromino::canFitOnGrid(const vector<vector<bool>>& grid)
+bool Tetromino::canFitOnGrid(const vector<vector<GridPointData>>& grid)
 {
     for (const auto& position : startingPositions)
     {
@@ -65,7 +66,7 @@ bool Tetromino::canFitOnGrid(const vector<vector<bool>>& grid)
         if (x < 0 || x >= grid.size() || y < 0 || y >= grid[0].size())
             return false;
 
-        if (grid[x][y] == true)
+        if (grid[x][y].occupied)
             return false;
     }
 

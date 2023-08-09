@@ -5,6 +5,7 @@
 
 #include "GameManager.h"
 #include "Tetromino.h"
+#include "GridPointData.h"
 #include "TBlock.h";
 #include "JBlock.h"
 #include "LBlock.h"
@@ -16,8 +17,10 @@
 using namespace std;
 using namespace sf;
 
-Tetromino* GameManager::getRandomBlock(vector<Tetromino*> blocksVector)
+Tetromino* GameManager::getRandomBlock()
 {
+	vector<Tetromino*> blocksVector = { new TBlock(), new LBlock(), new JBlock(), new OBlock(), new IBlock(), new SBlock(), new ZBlock() };
+
 	random_device randDev;
 	mt19937 generator(randDev());
 
@@ -69,14 +72,14 @@ vector<Tetromino*> GameManager::resetBlocksVector()
 	return { tBlock, lBlock, jBlock, oBlock, iBlock, sBlock, zBlock };
 }
 
-void GameManager::checkRowFull(const unsigned int& yAxis, const unsigned int& xAxis, vector<vector<bool>>& grid, vector<int>& linesToRemove)
+void GameManager::checkRowFull(const unsigned int& yAxis, const unsigned int& xAxis, vector<vector<GridPointData>>& grid, vector<int>& linesToRemove)
 {
 	for (size_t i = 0; i < yAxis; i++)
 	{
 		bool shouldRemoveLine = true;
 		for (size_t j = 0; j < xAxis; j++)
 		{
-			if (grid.at(j).at(i) != true)
+			if (!grid.at(j).at(i).occupied)
 			{
 				shouldRemoveLine = false;
 				break;
@@ -91,13 +94,13 @@ void GameManager::checkRowFull(const unsigned int& yAxis, const unsigned int& xA
 	}
 }
 
-void GameManager::setRowValue(vector<int>& linesToRemove, const unsigned int& xAxis, vector<vector<bool>>& grid, bool value)
+void GameManager::setRowValue(vector<int>& linesToRemove, const unsigned int& xAxis, vector<vector<GridPointData>>& grid)
 {
 	for (size_t i = 0; i < linesToRemove.size(); i++)
 	{
 		for (size_t j = 0; j < xAxis; j++)
 		{
-			grid.at(j).at(linesToRemove.at(i)) = value;
+			grid.at(j).at(linesToRemove.at(i)).changeOccupiedState();
 		}
 	}
 }

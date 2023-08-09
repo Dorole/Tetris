@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include "GridPointData.h"
 
 using namespace std;
 using namespace sf;
@@ -24,14 +25,14 @@ public:
             blockPosition[i] = args[i];
     }
 
-    virtual void rotateBlock(vector<vector<bool>>& grid) = 0;
+    virtual void rotateBlock(vector<vector<GridPointData>>& grid) = 0;
  
-    void translateBlockHorizontally(vector<vector<bool>>& grid, int direction);
+    void translateBlockHorizontally(vector<vector<GridPointData>>& grid, int direction);
 
     bool hasReachedBottomBorder(const int bottomBorderIndex);
 
-    bool canTranslateDownwards(vector<vector<bool>>& grid);
+    bool canTranslateDownwards(vector<vector<GridPointData>>& grid);
     
-    bool canFitOnGrid(const vector<vector<bool>>& grid);
+    bool canFitOnGrid(const vector<vector<GridPointData>>& grid);
 };
 

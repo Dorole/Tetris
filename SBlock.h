@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Tetromino.h"
+#include "GridPointData.h"
 
 using namespace std;
 
@@ -26,5 +27,5 @@ public:
         blockPosition[3] = startingPositions[3];
     }
 
-    void rotateBlock(vector<vector<bool>>& grid) override;
+    void rotateBlock(vector<vector<GridPointData>>& grid) override;
 };
