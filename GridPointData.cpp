@@ -1,5 +1,6 @@
 #include <vector>
 #include "GridPointData.h"
+#include <iostream>
 
 using namespace std;
 
@@ -45,13 +46,23 @@ void GridPointData::pushDataDownOnGrid(vector<vector<GridPointData>>& gridDataVe
     {
         for (int j = yAxis - 1; j > -1; j--)
         {
-            if (gridDataVector.at(i).at(j).occupied && (j + 1 < yAxis) && !gridDataVector.at(i).at(j + 1).occupied)
+            if (!gridDataVector.at(i).at(j).occupied)
+                continue;
+            
+            int drop = 0;
+            for (int step = 1; step < yAxis; step++)
             {
-                Color c = gridDataVector.at(i).at(j).color;
-                gridDataVector.at(i).at(j + 1).color = c;
-                gridDataVector.at(i).at(j + 1).changeOccupiedState();
-                gridDataVector.at(i).at(j).changeOccupiedState();
+                if ((j + step >= yAxis) || gridDataVector.at(i).at(j + step).occupied)
+                    break;
+                else
+                    drop = step;
             }
+
+			Color c = gridDataVector.at(i).at(j).color;
+			gridDataVector.at(i).at(j + drop).color = c;
+			gridDataVector.at(i).at(j + drop).changeOccupiedState();
+			gridDataVector.at(i).at(j).changeOccupiedState();
+            
         }
     }
 }

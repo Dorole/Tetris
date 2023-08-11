@@ -10,7 +10,7 @@
 #include "Tetromino.h"
 #include "GridPointData.h"
 #include "GameManager.h"
-#include "TBlock.h";
+#include "IBlock.h";
 
 
 using namespace std;
@@ -203,8 +203,8 @@ int main()
 
 					 }
 
-					 tetromino = gameManager.getRandomBlock();
-					 //tetromino = new TBlock();
+					 //tetromino = gameManager.getRandomBlock();
+					 tetromino = new IBlock();
 
 					 if (!tetromino->canFitOnGrid(testDataVector))
 					 {
