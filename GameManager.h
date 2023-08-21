@@ -18,5 +18,7 @@ public:
     void checkRowFull(const unsigned int& yAxis, const unsigned int& xAxis, vector<vector<GridPointData>>& grid, vector<int>& linesToRemove);
     void setRowValue(vector<int>& linesToRemove, const unsigned int& xAxis, vector<vector<GridPointData>>& grid);
     void clearBlocksVector(vector<Tetromino*>& blocksVector);
+    
+    void printBoardState(const unsigned int& xAxis, const unsigned int& yAxis, vector<vector<GridPointData>>& grid);
 };
 

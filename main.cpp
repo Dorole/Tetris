@@ -28,12 +28,36 @@ int main()
 #pragma region PARAMETERS
     GameManager gameManager;
 
-    RenderWindow window(VideoMode(1000, 1250), "Tetris");
+    RenderWindow window(VideoMode(1250, 1250), "Tetris");
     window.setPosition({ 340, 3 });
 
+	Texture backgroundTexture;
+	backgroundTexture.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/blackboard_large.png");
+	Sprite backgroundSprite(backgroundTexture);
+
     Texture buildingBlockTexture;
-    buildingBlockTexture.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/tetris_block_white.png");
+    buildingBlockTexture.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/tetris_block_white_chalk.png");
     Sprite blockSprite(buildingBlockTexture);
+
+	Texture borderTexture;
+	borderTexture.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/vertical_border.png");
+	Sprite borderSprite(borderTexture);
+	borderSprite.setPosition(Vector2f(1000, 0));
+
+	Font font;
+	font.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/sketch_font.otf");
+	Text scoreText;
+	scoreText.setFont(font);
+	scoreText.setString("SCORE");
+	scoreText.setPosition({ 1060, 500 });
+	scoreText.setCharacterSize(50);
+
+	Text scoreNum;
+	scoreNum.setFont(font);
+	scoreNum.setString("0");
+	scoreNum.setPosition({ 1060, 550 });
+	scoreNum.setCharacterSize(70);
+
 
     vector<Color> colorsVector =
     {
@@ -46,7 +70,6 @@ int main()
 
     blockSprite.setColor(gameManager.getRandomColor(colorsVector));
 
-    //vector<Tetromino*> blocksVector = gameManager.resetBlocksVector();
     Tetromino* tetromino = gameManager.getRandomBlock();
 
     // ************ BLOCK SPRITE *****************
@@ -67,11 +90,10 @@ int main()
 
     GridPointData gridData;
 
-	// TEST 2D DATA VEC INSTEAD OF BOOL VEC
-	vector<vector<GridPointData>> testDataVector;
+	vector<vector<GridPointData>> gridDataVector;
 	for (size_t i = 0; i < xAxis; i++)
 	{
-		testDataVector.push_back(vector<GridPointData>());
+		gridDataVector.push_back(vector<GridPointData>());
 
 		for (int j = 0; j < yAxis; j++)
 		{
@@ -82,53 +104,36 @@ int main()
 				colorsVector.at(0)
 			};
 
-			testDataVector.at(i).push_back(data);
+			gridDataVector.at(i).push_back(data);
 		}
 	}
 
     Clock clock;
 
-    vector<int> linesToRemove = {};
+    vector<int> linesToClear = {};
     bool gameOver = false;
+
+	int clearedLines = 0;
+	int scoreMultiplier = 10;
 #pragma endregion 
 
      while (window.isOpen())
      {
-		 gameManager.checkRowFull(yAxis, xAxis, testDataVector, linesToRemove);
+		 gameManager.checkRowFull(yAxis, xAxis, gridDataVector, linesToClear);
 
-		 while (!linesToRemove.empty())
+		 while (!linesToClear.empty())
 		 {
-			 cout << "BOARD STATE:" << endl;
-			 for (size_t i = 0; i < yAxis; i++)
-			 {
-				 for (size_t j = 0; j < xAxis; j++)
-				 {
-					 cout << testDataVector[j][i].occupied << " ";
-				 }
-				 cout << endl;
-			 }
-
-			 //remove data from removed rows
-			 gameManager.setRowValue(linesToRemove, xAxis, testDataVector);
+			 //remove data from cleared rows
+			 gameManager.setRowValue(linesToClear, xAxis, gridDataVector);
 
 			 //push remaining data and blocks down
-			 gridData.pushDataDownOnGrid(testDataVector, xAxis, yAxis);
+			 gridData.pushDataDownOnGrid(gridDataVector, xAxis, yAxis);
 
-			 linesToRemove.clear();
-
-			 cout << "BOARD STATE:" << endl;
-			 for (size_t i = 0; i < yAxis; i++)
-			 {
-				 for (size_t j = 0; j < xAxis; j++)
-				 {
-					 cout << testDataVector[j][i].occupied << " ";
-				 }
-				 cout << endl;
-			 }
-
+			 clearedLines += linesToClear.size();
+			 linesToClear.clear();
 		 }
 
-		 if (linesToRemove.empty())
+		 if (linesToClear.empty())
 		 {
 			 Time elapsedTime = clock.getElapsedTime();
 
@@ -147,19 +152,22 @@ int main()
 					 case Keyboard::A:
 					 case Keyboard::Left:
 						 //move left by 1
-						 tetromino->translateBlockHorizontally(testDataVector, -1);
+						 tetromino->translateBlockHorizontally(gridDataVector, -1);
 						 break;
 					 case Keyboard::D:
 					 case Keyboard::Right:
 						 //move right by 1
-						 tetromino->translateBlockHorizontally(testDataVector, 1);
+						 tetromino->translateBlockHorizontally(gridDataVector, 1);
 						 break;
 					 case Keyboard::Space:
-						 tetromino->rotateBlock(testDataVector);
+						 tetromino->rotateBlock(gridDataVector);
 						 break;
 					 case Keyboard::S:
 					 case Keyboard::Down:
 						 currentFallingSpeed = defaultFallingSpeed / 3;
+						 break;
+					 case Keyboard::P: //TEST
+						 clearedLines++;
 						 break;
 					 default:
 						 break;
@@ -189,7 +197,7 @@ int main()
 			 if (!gameOver && elapsedTime.asSeconds() >= currentFallingSpeed)
 			 {
 				 if (!(tetromino->hasReachedBottomBorder(lastY)) &&
-					 tetromino->canTranslateDownwards(testDataVector))
+					 tetromino->canTranslateDownwards(gridDataVector))
 				 {
 					 for (size_t i = 0; i < 4; i++)
 						 tetromino->blockPosition[i].y++;
@@ -198,15 +206,14 @@ int main()
 				 {
 					 for (auto blockPoint : tetromino->blockPosition)
 					 {
-						 testDataVector[blockPoint.x][blockPoint.y].occupied = true;
-						 testDataVector[blockPoint.x][blockPoint.y].color = blockSprite.getColor();
+						 gridDataVector[blockPoint.x][blockPoint.y].occupied = true;
+						 gridDataVector[blockPoint.x][blockPoint.y].color = blockSprite.getColor();
 
 					 }
 
-					 //tetromino = gameManager.getRandomBlock();
-					 tetromino = new IBlock();
+					 tetromino = gameManager.getRandomBlock();
 
-					 if (!tetromino->canFitOnGrid(testDataVector))
+					 if (!tetromino->canFitOnGrid(gridDataVector))
 					 {
 						 cout << "GAME OVER" << endl;
 						 gameOver = true;
@@ -225,6 +232,12 @@ int main()
 
 			 // ************************ DRAW WORLD *****************************
 
+			 window.draw(backgroundSprite);
+			 window.draw(borderSprite);
+			 window.draw(scoreText);
+			 scoreNum.setString(to_string(clearedLines * scoreMultiplier));
+			 window.draw(scoreNum);
+
 			 //draw tetromino
 			 if (!gameOver)
 			 {
@@ -241,10 +254,10 @@ int main()
 		 {
 			 for (int j = 0; j < yAxis; j++)
 			 {
-				 if (testDataVector.at(i).at(j).occupied)
+				 if (gridDataVector.at(i).at(j).occupied)
 				 {
 					 Sprite fixedBlockSprite = blockSprite;
-					 fixedBlockSprite.setColor(testDataVector[i][j].color);
+					 fixedBlockSprite.setColor(gridDataVector[i][j].color);
 					 fixedBlockSprite.setPosition(i * blockOffset, j * blockOffset);
 
 					 window.draw(fixedBlockSprite);

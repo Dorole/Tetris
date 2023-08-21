@@ -28,7 +28,7 @@ Tetromino* GameManager::getRandomBlock()
 
 	unsigned randIndex = distribution(generator);
 
-	cout << "Spawned new block" << endl;
+	cout << randIndex << endl;
 	return blocksVector[randIndex];
 }
 
@@ -102,6 +102,19 @@ void GameManager::setRowValue(vector<int>& linesToRemove, const unsigned int& xA
 		{
 			grid.at(j).at(linesToRemove.at(i)).changeOccupiedState();
 		}
+	}
+}
+
+void GameManager::printBoardState(const unsigned int& xAxis, const unsigned int& yAxis, vector<vector<GridPointData>>& grid)
+{
+	cout << "BOARD STATE:" << endl;
+	for (size_t i = 0; i < yAxis; i++)
+	{
+		for (size_t j = 0; j < xAxis; j++)
+		{
+			cout << grid[j][i].occupied << " ";
+		}
+		cout << endl;
 	}
 }
 
