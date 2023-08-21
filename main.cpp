@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <random>
 #include <algorithm>
 
@@ -10,25 +11,17 @@
 #include "Tetromino.h"
 #include "GridPointData.h"
 #include "GameManager.h"
-#include "IBlock.h";
 
 
 using namespace std;
 using namespace sf;
-
-bool compareValueByY(const GridPointData& a, const GridPointData& b)
-{
-    return a.coordinates.y > b.coordinates.y;
-}
-
-
 
 int main()
 {
 #pragma region PARAMETERS
     GameManager gameManager;
 
-    RenderWindow window(VideoMode(1250, 1250), "Tetris");
+    RenderWindow window(VideoMode(1260, 1250), "Tetris");
     window.setPosition({ 340, 3 });
 
 	Texture backgroundTexture;
@@ -58,6 +51,13 @@ int main()
 	scoreNum.setPosition({ 1060, 550 });
 	scoreNum.setCharacterSize(70);
 
+	//Text nextBlockText;
+
+	Text gameOverText;
+	gameOverText.setFont(font);
+	gameOverText.setPosition({ 1060, 100 });
+	gameOverText.setCharacterSize(60);
+	//setColor
 
     vector<Color> colorsVector =
     {
@@ -70,7 +70,13 @@ int main()
 
     blockSprite.setColor(gameManager.getRandomColor(colorsVector));
 
-    Tetromino* tetromino = gameManager.getRandomBlock();
+	queue<Tetromino*> tetrominoQueue; 
+	for (size_t i = 0; i < 2; i++)
+		tetrominoQueue.push(gameManager.getRandomBlock());
+	
+	Tetromino* tetromino = tetrominoQueue.front();
+	Tetromino* nextBlock = tetrominoQueue.back();
+	Color nextBlockColor = Color::White; //RIJESI BOJE
 
     // ************ BLOCK SPRITE *****************
     float targetWidth = 50.f;
@@ -80,9 +86,10 @@ int main()
     blockSprite.setScale(scaleX, scaleY);
 
     // ************* GAMEPLAY CONFIG *****************
-    // potencijalno namjestiti u GameManageru i preuzeti od tamo?
     const unsigned int blockOffset = 50;
-    const auto defaultFallingSpeed = 0.3f;
+	const unsigned int nextBlockPositionOffsetX = 13;
+	const unsigned int nextBlockPositionOffsetY = 13;
+    const auto defaultFallingSpeed = 0.3f; //NE CONST > MIJENJA SE OVISNO O BROJU BODOVA: vise bodova, veca brzina!
     float currentFallingSpeed = defaultFallingSpeed;
     const unsigned int xAxis = 20;
     const unsigned int yAxis = 25;
@@ -211,11 +218,15 @@ int main()
 
 					 }
 
-					 tetromino = gameManager.getRandomBlock();
+					 tetrominoQueue.pop();
+					 tetromino = nextBlock;
+					 tetrominoQueue.push(gameManager.getRandomBlock());
+					 nextBlock = tetrominoQueue.back();
 
 					 if (!tetromino->canFitOnGrid(gridDataVector))
 					 {
 						 cout << "GAME OVER" << endl;
+						 gameOverText.setString("GAME \nOVER");
 						 gameOver = true;
 					 }
 					 else
@@ -237,6 +248,18 @@ int main()
 			 window.draw(scoreText);
 			 scoreNum.setString(to_string(clearedLines * scoreMultiplier));
 			 window.draw(scoreNum);
+
+			 if (gameOver)
+				 window.draw(gameOverText);
+
+			 //draw next block preview
+			 for (auto position : nextBlock->blockPosition)
+			 {
+				 Sprite nextBlockSprite = blockSprite;
+				 nextBlockSprite.setPosition((position.x + nextBlockPositionOffsetX) * blockOffset, (position.y + nextBlockPositionOffsetY) * blockOffset);
+				 nextBlockSprite.setColor(nextBlockColor);
+				 window.draw(nextBlockSprite);
+			 }
 
 			 //draw tetromino
 			 if (!gameOver)
@@ -270,6 +293,7 @@ int main()
      }
 
     delete tetromino;
+	delete nextBlock;
 }
 
 
