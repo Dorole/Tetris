@@ -11,6 +11,7 @@
 #include "Tetromino.h"
 #include "GridPointData.h"
 #include "GameManager.h"
+#include "VisualsSetter.h"
 
 
 using namespace std;
@@ -19,11 +20,15 @@ using namespace sf;
 int main()
 {
 #pragma region PARAMETERS
-    GameManager gameManager;
+	Clock clock;
+	GameManager gameManager;
+	GridPointData gridData;
+	VisualsSetter visualsSetter;
 
     RenderWindow window(VideoMode(1260, 1250), "Tetris");
     window.setPosition({ 340, 3 });
 
+	// ************* TEXTURES & SPRITES *****************
 	Texture backgroundTexture;
 	backgroundTexture.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/blackboard_large.png");
 	Sprite backgroundSprite(backgroundTexture);
@@ -37,65 +42,50 @@ int main()
 	Sprite borderSprite(borderTexture);
 	borderSprite.setPosition(Vector2f(1000, 0));
 
-	Font font;
-	font.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/sketch_font.otf");
-	Text scoreText;
-	scoreText.setFont(font);
-	scoreText.setString("SCORE");
-	scoreText.setPosition({ 1060, 500 });
-	scoreText.setCharacterSize(50);
-
-	Text scoreNum;
-	scoreNum.setFont(font);
-	scoreNum.setString("0");
-	scoreNum.setPosition({ 1060, 550 });
-	scoreNum.setCharacterSize(70);
-
-	//Text nextBlockText;
-
-	Text gameOverText;
-	gameOverText.setFont(font);
-	gameOverText.setPosition({ 1060, 100 });
-	gameOverText.setCharacterSize(60);
-	//setColor
-
-    vector<Color> colorsVector =
-    {
-        Color(255,89,143),
-        Color(253,138,94),
-        Color(224,227,0),
-        Color(1,221,221),
-        Color(0,191,175)
+	vector<Color> colorsVector =
+	{
+		Color(210,30,120),  // purple
+		Color(0,204,204),   // light blue
+		Color(199,191,54),  // lemon green
+		Color(241,119,112), // salmon pink
+		Color(45,205,113),  // bright green
+		Color(228,126,35),  // orange
+		Color(234,76,61),   // red
+		Color(239,196,32),  // yellow
+		Color(3,146,245),   // azure blue
+		Color(255,153,255)  // pink
     };
 
     blockSprite.setColor(gameManager.getRandomColor(colorsVector));
+	visualsSetter.setSpriteScale(blockSprite, 50, 50);
 
+	// ************* TEXT *****************
+	Font font;
+	font.loadFromFile("C:/Users/dorot/Desktop/C++/Tetris/Resources/sketch_font.otf");
+	
+	Text* scoreText = visualsSetter.createNewText(font, "SCORE", Vector2f(1060, 600), 50);
+	Text* scoreNum = visualsSetter.createNewText(font, "0", Vector2f(1060, 650), 70);
+	Text* nextBlockText = visualsSetter.createNewText(font, "NEXT", Vector2f(1060, 250), 60);
+	Text* gameOverText = visualsSetter.createNewText(font, "", Vector2f(1060, 850), 60);
+
+	// ************* TETROMINO *****************
 	queue<Tetromino*> tetrominoQueue; 
 	for (size_t i = 0; i < 2; i++)
 		tetrominoQueue.push(gameManager.getRandomBlock());
 	
 	Tetromino* tetromino = tetrominoQueue.front();
 	Tetromino* nextBlock = tetrominoQueue.back();
-	Color nextBlockColor = Color::White; //RIJESI BOJE
-
-    // ************ BLOCK SPRITE *****************
-    float targetWidth = 50.f;
-    float targetHeight = 50.f;
-    float scaleX = targetWidth / blockSprite.getGlobalBounds().width;
-    float scaleY = targetHeight / blockSprite.getGlobalBounds().height;
-    blockSprite.setScale(scaleX, scaleY);
+	Color nextBlockColor = Color::White; 
 
     // ************* GAMEPLAY CONFIG *****************
     const unsigned int blockOffset = 50;
 	const unsigned int nextBlockPositionOffsetX = 13;
-	const unsigned int nextBlockPositionOffsetY = 13;
+	const unsigned int nextBlockPositionOffsetY = 7;
     const auto defaultFallingSpeed = 0.3f; //NE CONST > MIJENJA SE OVISNO O BROJU BODOVA: vise bodova, veca brzina!
     float currentFallingSpeed = defaultFallingSpeed;
     const unsigned int xAxis = 20;
     const unsigned int yAxis = 25;
     const auto lastY = 24;
-
-    GridPointData gridData;
 
 	vector<vector<GridPointData>> gridDataVector;
 	for (size_t i = 0; i < xAxis; i++)
@@ -115,13 +105,11 @@ int main()
 		}
 	}
 
-    Clock clock;
-
-    vector<int> linesToClear = {};
-    bool gameOver = false;
-
+	vector<int> linesToClear = {};
 	int clearedLines = 0;
 	int scoreMultiplier = 10;
+	string scoreString = to_string(clearedLines * scoreMultiplier);
+    bool gameOver = false;
 #pragma endregion 
 
      while (window.isOpen())
@@ -137,6 +125,7 @@ int main()
 			 gridData.pushDataDownOnGrid(gridDataVector, xAxis, yAxis);
 
 			 clearedLines += linesToClear.size();
+			 scoreString = to_string(clearedLines * scoreMultiplier);
 			 linesToClear.clear();
 		 }
 
@@ -175,6 +164,7 @@ int main()
 						 break;
 					 case Keyboard::P: //TEST
 						 clearedLines++;
+						 scoreNum->setString(to_string(clearedLines * scoreMultiplier));
 						 break;
 					 default:
 						 break;
@@ -226,7 +216,7 @@ int main()
 					 if (!tetromino->canFitOnGrid(gridDataVector))
 					 {
 						 cout << "GAME OVER" << endl;
-						 gameOverText.setString("GAME \nOVER");
+						 gameOverText->setString("GAME \nOVER");
 						 gameOver = true;
 					 }
 					 else
@@ -245,12 +235,13 @@ int main()
 
 			 window.draw(backgroundSprite);
 			 window.draw(borderSprite);
-			 window.draw(scoreText);
-			 scoreNum.setString(to_string(clearedLines * scoreMultiplier));
-			 window.draw(scoreNum);
+			 window.draw(*scoreText);
+			 scoreNum->setString(scoreString);
+			 window.draw(*scoreNum);
+			 window.draw(*nextBlockText);
 
 			 if (gameOver)
-				 window.draw(gameOverText);
+				 window.draw(*gameOverText);
 
 			 //draw next block preview
 			 for (auto position : nextBlock->blockPosition)
@@ -294,6 +285,10 @@ int main()
 
     delete tetromino;
 	delete nextBlock;
+	delete scoreText;
+	delete scoreNum;
+	delete nextBlockText;
+	delete gameOverText;
 }
 
 

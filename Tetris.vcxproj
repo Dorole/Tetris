@@ -142,6 +142,7 @@
     <ClCompile Include="SBlock.cpp" />
     <ClCompile Include="TBlock.cpp" />
     <ClCompile Include="Tetromino.cpp" />
+    <ClCompile Include="VisualsSetter.cpp" />
     <ClCompile Include="ZBlock.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +172,7 @@
     <ClInclude Include="SBlock.h" />
     <ClInclude Include="TBlock.h" />
     <ClInclude Include="Tetromino.h" />
+    <ClInclude Include="VisualsSetter.h" />
     <ClInclude Include="ZBlock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
