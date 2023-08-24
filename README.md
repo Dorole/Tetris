@@ -5,7 +5,7 @@ Controls: <br>
 * speed up the fall: S / down arrow
 * rotate: space 
 
-Each cleared line = 10 points. In case the next block can't fit on the board, the game is over.
+Each cleared line = 10 points. In case the next block can't fit on the board, the game is over. Speed increases after every 10th cleared line.
 
 TO DO [2023-08-24]:<br>
 * music and audio
