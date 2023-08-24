@@ -14,7 +14,6 @@ void Tetromino::translateBlockHorizontally(vector<vector<GridPointData>>& grid, 
     {
         if ((positions.x + direction) < 0 || (positions.x + direction) > (grid.size() - 1))
         {
-            cout << "Grid border reached" << endl;
             return;
         }
     }

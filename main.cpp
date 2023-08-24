@@ -81,11 +81,14 @@ int main()
     const unsigned int blockOffset = 50;
 	const unsigned int nextBlockPositionOffsetX = 13;
 	const unsigned int nextBlockPositionOffsetY = 7;
-    const auto defaultFallingSpeed = 0.3f; //NE CONST > MIJENJA SE OVISNO O BROJU BODOVA: vise bodova, veca brzina!
-    float currentFallingSpeed = defaultFallingSpeed;
     const unsigned int xAxis = 20;
     const unsigned int yAxis = 25;
     const auto lastY = 24;
+    float defaultFallingSpeed = 0.5f; 
+    float currentFallingSpeed = defaultFallingSpeed;
+	float speedModifierFactor = 1.1f;
+	float maxSpeed = 0.04f;
+	unsigned int clearedLinesSpeedThreshold = 10;
 
 	vector<vector<GridPointData>> gridDataVector;
 	for (size_t i = 0; i < xAxis; i++)
@@ -110,6 +113,7 @@ int main()
 	int scoreMultiplier = 10;
 	string scoreString = to_string(clearedLines * scoreMultiplier);
     bool gameOver = false;
+
 #pragma endregion 
 
      while (window.isOpen())
@@ -124,8 +128,14 @@ int main()
 			 //push remaining data and blocks down
 			 gridData.pushDataDownOnGrid(gridDataVector, xAxis, yAxis);
 
+			 //add score
 			 clearedLines += linesToClear.size();
 			 scoreString = to_string(clearedLines * scoreMultiplier);
+
+			 //increase speed for every 10th cleared line
+			 if (clearedLines > 0 && clearedLines % clearedLinesSpeedThreshold == 0 && defaultFallingSpeed > maxSpeed)
+				defaultFallingSpeed /= speedModifierFactor;
+
 			 linesToClear.clear();
 		 }
 
@@ -160,11 +170,11 @@ int main()
 						 break;
 					 case Keyboard::S:
 					 case Keyboard::Down:
-						 currentFallingSpeed = defaultFallingSpeed / 3;
+						 currentFallingSpeed = defaultFallingSpeed / 5;
 						 break;
 					 case Keyboard::P: //TEST
 						 clearedLines++;
-						 scoreNum->setString(to_string(clearedLines * scoreMultiplier));
+						 scoreString = to_string(clearedLines * scoreMultiplier);
 						 break;
 					 default:
 						 break;
@@ -215,7 +225,6 @@ int main()
 
 					 if (!tetromino->canFitOnGrid(gridDataVector))
 					 {
-						 cout << "GAME OVER" << endl;
 						 gameOverText->setString("GAME \nOVER");
 						 gameOver = true;
 					 }

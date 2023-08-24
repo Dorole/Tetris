@@ -28,7 +28,6 @@ Tetromino* GameManager::getRandomBlock()
 
 	unsigned randIndex = distribution(generator);
 
-	cout << randIndex << endl;
 	return blocksVector[randIndex];
 }
 
